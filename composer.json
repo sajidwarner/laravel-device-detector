@@ -1,0 +1,61 @@
+{
+    "name": "sajidwarner/laravel-device-detector",
+    "description": "A comprehensive Laravel package for detecting browsers, devices, robots, platforms, and Tor connections with advanced user agent parsing",
+    "keywords": [
+        "laravel",
+        "device-detection",
+        "browser-detection",
+        "user-agent",
+        "mobile-detection",
+        "robot-detection",
+        "tor-detection",
+        "bot-detection",
+        "user-agent-parser"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sajid Warner",
+            "email": "your-email@example.com",
+            "homepage": "https://github.com/sajidwarner"
+        }
+    ],
+    "require": {
+        "php": "^8.1|^8.2|^8.3",
+        "illuminate/support": "^10.0|^11.0",
+        "illuminate/http": "^10.0|^11.0",
+        "illuminate/cache": "^10.0|^11.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^8.0|^9.0",
+        "phpunit/phpunit": "^10.0",
+        "mockery/mockery": "^1.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "SajidWarner\\DeviceDetector\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SajidWarner\\DeviceDetector\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "SajidWarner\\DeviceDetector\\DeviceDetectorServiceProvider"
+            ],
+            "aliases": {
+                "DeviceDetector": "SajidWarner\\DeviceDetector\\Facades\\DeviceDetector"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
