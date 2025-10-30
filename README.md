@@ -254,7 +254,8 @@ If you discover any security issues, please email security@example.com instead o
 
 ## Credits
 
-- [Sajid Warner](https://github.com/sajidwarner)
+- [Sajid Warner](https://github.com/sajidwarner) - Package Author & Maintainer
+- [Claude.ai](https://claude.ai) - AI Assistant by Anthropic (Package Development & Architecture)
 
 ## License
 
