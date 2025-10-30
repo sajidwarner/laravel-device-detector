@@ -208,12 +208,15 @@ class DeviceDetector
     protected function extractVersion(string $userAgent, string $browser): string
     {
         $patterns = [
+            'Kahf' => '/kahf\/([0-9\.]+)/i',
             'Google Chrome' => '/chrome\/([0-9\.]+)/i',
             'Firefox' => '/firefox\/([0-9\.]+)/i',
             'Safari' => '/version\/([0-9\.]+)/i',
             'Microsoft Edge' => '/edg\/([0-9\.]+)/i',
             'Opera' => '/opr\/([0-9\.]+)/i',
             'Samsung Internet' => '/samsungbrowser\/([0-9\.]+)/i',
+            'Brave' => '/chrome\/([0-9\.]+)/i',
+            'Vivaldi' => '/vivaldi\/([0-9\.]+)/i',
         ];
 
         if (isset($patterns[$browser]) && preg_match($patterns[$browser], $userAgent, $matches)) {
