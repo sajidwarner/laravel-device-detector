@@ -155,10 +155,12 @@ class DeviceDetector
     protected function detectBrowser(string $userAgent): array
     {
         $secChUa = strtolower($this->request->header('Sec-CH-UA', ''));
+        $xRequestedWith = strtolower($this->request->header('X-Requested-With', ''));
 
         $browsers = [
             'Brave' => ['/brave/i', '/Brave/'],
-            'Kahf' => ['/kahf/i'],
+            'Kahf' => ['/kahf/'],
+            'DuckDuckGo' => ['/duckduckgo/', '/ddg/i'],
             'Microsoft Edge' => ['/edg\//i', '/edge\//i'],
             'Opera GX' => ['/oprgx/i'],
             'Opera' => ['/opr\//i', '/opera/i'],
@@ -173,27 +175,55 @@ class DeviceDetector
             'Chromium' => ['/chromium/i'],
         ];
 
-        // Try Sec-CH-UA header first
+        $browserName = 'Unknown';
+        $browserVersion = '';
+
+        // 1️⃣ Check X-Requested-With (mobile apps)
+        if (!empty($xRequestedWith)) {
+            if (str_contains($xRequestedWith, 'io.kahf.browser')) {
+                $browserName = 'Kahf Browser';
+                $browserVersion = $this->extractVersion($userAgent, 'Kahf');
+            } elseif (str_contains($xRequestedWith, 'com.duckduckgo.mobile')) {
+                $browserName = 'DuckDuckGo Browser';
+                $browserVersion = $this->extractVersion($userAgent, 'DuckDuckGo');
+            }
+
+            return [
+                'name' => $browserName,
+                'version' => $browserVersion
+            ];
+        }
+
+        // 2️⃣ Try Sec-CH-UA header
         if (!empty($secChUa)) {
             foreach ($browsers as $name => $patterns) {
                 foreach ($patterns as $pattern) {
-                    if (str_contains($secChUa, strtolower(str_replace('/', '', $pattern)))) {
+                    $patternClean = strtolower(str_replace('/', '', $pattern));
+                    if (str_contains($secChUa, $patternClean)) {
+                        $browserName = $name;
+                        $browserVersion = $this->extractVersion($userAgent, $name);
                         return [
-                            'name' => $name,
-                            'version' => $this->extractVersion($userAgent, $name)
+                            'name' => $browserName,
+                            'version' => $browserVersion
                         ];
                     }
                 }
             }
         }
 
-        // Fallback to User-Agent
+        // 3️⃣ Fallback to User-Agent
         foreach ($browsers as $name => $patterns) {
             foreach ($patterns as $pattern) {
                 if (preg_match($pattern, $userAgent)) {
+                    // Special case: DuckDuckGo desktop
+                    if ($name === 'Safari' && preg_match('/ddg/i', $userAgent)) {
+                        $name = 'DuckDuckGo';
+                    }
+                    $browserName = $name;
+                    $browserVersion = $this->extractVersion($userAgent, $name);
                     return [
-                        'name' => $name,
-                        'version' => $this->extractVersion($userAgent, $name)
+                        'name' => $browserName,
+                        'version' => $browserVersion
                     ];
                 }
             }
@@ -202,6 +232,8 @@ class DeviceDetector
         return ['name' => 'Unknown', 'version' => ''];
     }
 
+
+
     /**
      * Extract browser version
      */
@@ -209,6 +241,7 @@ class DeviceDetector
     {
         $patterns = [
             'Kahf' => '/kahf\/([0-9\.]+)/i',
+            'DuckDuckGo' => '/(?:duckduckgo|ddg)\/([0-9\.]+)/i',
             'Google Chrome' => '/chrome\/([0-9\.]+)/i',
             'Firefox' => '/firefox\/([0-9\.]+)/i',
             'Safari' => '/version\/([0-9\.]+)/i',
