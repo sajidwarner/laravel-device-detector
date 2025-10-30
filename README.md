@@ -250,12 +250,15 @@ composer test
 
 ## Security
 
-If you discover any security issues, please email security@example.com instead of using the issue tracker.
+If you discover any security issues, please email bestcyberking@gmail.com
+ instead of using the issue tracker.
 
 ## Credits
 
-- [Sajid Warner](https://github.com/sajidwarner) - Package Author & Maintainer
+- [Syed Sajid Akram](https://github.com/sajidwarner) - Package Author & Maintainer
 - [Claude.ai](https://claude.ai) - AI Assistant by Anthropic (Package Development & Architecture)
+- [ChatGPT](https://chat.openai.com/) - AI Assistant by OpenAI (Code Assistance & Suggestions)
+- [Google Gemini](https://gemini.google/) - AI Assistant by Google (Code Assistance & Suggestions)
 
 ## License
 
