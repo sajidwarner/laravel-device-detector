@@ -5,6 +5,7 @@ namespace SajidWarner\DeviceDetector;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class DeviceDetector
 {
@@ -49,6 +50,9 @@ class DeviceDetector
         // Detect Device Type and Details
         $deviceData = $this->detectDevice($userAgent);
 
+        // Detect IP Geolocation
+        $location = $this->getIpGeolocation($ip);
+
         $this->detectionData = [
             'browser' => $browserData['name'],
             'browser_version' => $browserData['version'],
@@ -62,11 +66,64 @@ class DeviceDetector
             'is_robot' => $robotData['is_robot'],
             'is_tor' => $isTor,
             'robot_name' => $robotData['name'],
-            'ip' => $ip
+            'ip' => $ip,
+            'location' => $location,
         ];
 
         $this->isDetected = true;
         return $this->detectionData;
+    }
+
+    /**
+     * Get IP geolocation data via ipgeolocation.io
+     */
+    protected function getIpGeolocation(string $ip): array
+    {
+        if (!config('device-detector.enable_ip_geolocation', false)) {
+            return [];
+        }
+
+        $apiKey = config('device-detector.ip_geolocation_api_key', '');
+        if (empty($apiKey)) {
+            return [];
+        }
+
+        $cacheDuration = config('device-detector.ip_geolocation_cache_duration', 3600);
+        $cacheKey = 'device_detector_geo_' . md5($ip);
+
+        return Cache::remember($cacheKey, $cacheDuration, function () use ($ip, $apiKey) {
+            try {
+                $apiUrl = config('device-detector.ip_geolocation_api_url', 'https://api.ipgeolocation.io/v3/ipgeo');
+                $response = Http::timeout(5)->get($apiUrl, [
+                    'apiKey' => $apiKey,
+                    'ip' => $ip,
+                ]);
+
+                if ($response->successful()) {
+                    $geo = $response->json();
+                    return [
+                        'country' => $geo['country_name'] ?? null,
+                        'country_code' => $geo['country_code2'] ?? null,
+                        'city' => $geo['city'] ?? null,
+                        'state' => $geo['state_prov'] ?? null,
+                        'district' => $geo['district'] ?? null,
+                        'zip' => $geo['zipcode'] ?? null,
+                        'latitude' => $geo['latitude'] ?? null,
+                        'longitude' => $geo['longitude'] ?? null,
+                        'timezone' => $geo['time_zone']['name'] ?? null,
+                        'isp' => $geo['isp'] ?? null,
+                        'organization' => $geo['organization'] ?? null,
+                        'currency' => $geo['currency']['code'] ?? null,
+                        'calling_code' => $geo['calling_code'] ?? null,
+                        'is_eu' => $geo['is_eu'] ?? false,
+                    ];
+                }
+            } catch (\Exception $e) {
+                Log::warning('Failed to fetch IP geolocation: ' . $e->getMessage());
+            }
+
+            return [];
+        });
     }
 
     /**
@@ -98,7 +155,7 @@ class DeviceDetector
                     return $matches[1] ?? [];
                 }
             } catch (\Exception $e) {
-                \Log::warning('Failed to fetch Tor exit nodes: ' . $e->getMessage());
+                Log::warning('Failed to fetch Tor exit nodes: ' . $e->getMessage());
             }
             return [];
         });
@@ -270,7 +327,6 @@ class DeviceDetector
         }
 
         $platforms = [
-            'Windows 11' => '/windows nt 10\.0.*; win64.*; x64.*; (rv|edge|edg)/i',
             'Windows 10' => '/windows nt 10/i',
             'Windows 8.1' => '/windows nt 6\.3/i',
             'Windows 8' => '/windows nt 6\.2/i',
@@ -320,7 +376,7 @@ class DeviceDetector
             'type' => $isTablet ? 'tablet' : ($isMobile ? 'mobile' : 'desktop'),
             'brand' => $brand,
             'model' => $model,
-            'is_mobile' => $isMobile,
+            'is_mobile' => $isMobile && !$isTablet,
             'is_tablet' => $isTablet,
             'is_desktop' => $isDesktop,
         ];
@@ -535,5 +591,11 @@ class DeviceDetector
     {
         $data = $this->detect($request);
         return $data['is_tor'];
+    }
+
+    public function getLocation(?Request $request = null): array
+    {
+        $data = $this->detect($request);
+        return $data['location'] ?? [];
     }
 }

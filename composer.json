@@ -25,8 +25,8 @@
     "credits": [
         "Package development assisted by Claude.ai (Anthropic)"
     ],
-   "require": {
-        "php": "^8.1|^8.2|^8.3|^8.4",
+    "require": {
+        "php": "^8.1",
         "illuminate/support": "^10.0|^11.0|^12.0",
         "illuminate/http": "^10.0|^11.0|^12.0",
         "illuminate/cache": "^10.0|^11.0|^12.0"

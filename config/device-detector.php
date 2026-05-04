@@ -30,4 +30,22 @@ return [
 
     'enable_robot_detection' => env('DEVICE_DETECTOR_ROBOT_DETECTION', true),
 
+    /*
+    |--------------------------------------------------------------------------
+    | IP Geolocation Settings (ipgeolocation.io)
+    |--------------------------------------------------------------------------
+    |
+    | Enable IP geolocation to get country, city, ISP, timezone, and more.
+    | Get a free API key at https://ipgeolocation.io (30,000 req/month free).
+    |
+    */
+
+    'enable_ip_geolocation' => env('DEVICE_DETECTOR_GEO_ENABLED', false),
+
+    'ip_geolocation_api_key' => env('DEVICE_DETECTOR_GEO_API_KEY', ''),
+
+    'ip_geolocation_api_url' => env('DEVICE_DETECTOR_GEO_URL', 'https://api.ipgeolocation.io/v3/ipgeo'),
+
+    'ip_geolocation_cache_duration' => env('DEVICE_DETECTOR_GEO_CACHE', 3600),
+
 ];
