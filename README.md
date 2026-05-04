@@ -16,7 +16,7 @@ A powerful Laravel package for **browser detection**, **device detection**, **IP
 - 📊 **Tablet Detection** — iPad, Android tablets, Kindle, and more
 - 🤖 **Robot / Bot Detection** — 26+ bots: Googlebot, Bingbot, Facebook, Twitter, LinkedIn, WhatsApp, Telegram, Semrush, Ahrefs, and more
 - 🔒 **Tor Detection** — Real-time Tor exit node detection with caching
-- 🗺️ **IP Geolocation** — Country, city, timezone, ISP, currency via [ipgeolocation.io](https://ipgeolocation.io) (free plan available)
+- 🗺️ **IP Geolocation** — Country, city, timezone, ISP, currency via [ipgeolocation.io](https://app.ipgeolocation.io/signup?referral=AFF-YWEVCOJFNY) (free plan available)
 - 🖥️ **Platform / OS Detection** — Windows 10, macOS, Linux, Android, iOS, Chrome OS, BlackBerry, and more
 - ⚡ **Performance** — Per-IP caching for geolocation and Tor nodes
 - 🎯 **Client Hints Support** — Uses modern `Sec-CH-UA` headers as primary detection method
@@ -178,13 +178,13 @@ public function handle($request, Closure $next)
 
 ## IP Geolocation
 
-Get real-time location data for any visitor IP using [ipgeolocation.io](https://ipgeolocation.io).
+Get real-time location data for any visitor IP using [ipgeolocation.io](https://app.ipgeolocation.io/signup?referral=AFF-YWEVCOJFNY).
 
 **Free plan:** 30,000 requests/month — no credit card required.
 
 ### Setup
 
-1. Sign up at [ipgeolocation.io](https://ipgeolocation.io) and get your free API key
+1. Sign up at [ipgeolocation.io](https://app.ipgeolocation.io/signup?referral=AFF-YWEVCOJFNY) and get your free API key
 2. Add to your `.env` file (**never commit your API key to git**):
 
 ```env
