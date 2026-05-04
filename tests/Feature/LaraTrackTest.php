@@ -88,6 +88,81 @@ class LaraTrackTest extends TestCase
     }
 
     #[Test]
+    public function it_can_detect_kahf_browser_via_user_agent(): void
+    {
+        $request = Request::create('/', 'GET');
+        $request->headers->set('User-Agent', 'Mozilla/5.0 (Linux; Android 12; SM-A525F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36 Kahf/1.0.0');
+
+        $result = LaraTrack::detect($request);
+
+        $this->assertEquals('Kahf Browser', $result['browser']);
+        $this->assertTrue($result['is_mobile']);
+    }
+
+    #[Test]
+    public function it_can_detect_kahf_browser_via_x_requested_with(): void
+    {
+        $request = Request::create('/', 'GET');
+        $request->headers->set('User-Agent', 'Mozilla/5.0 (Linux; Android 12; SM-A525F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36');
+        $request->headers->set('X-Requested-With', 'io.kahf.browser');
+
+        $result = LaraTrack::detect($request);
+
+        $this->assertEquals('Kahf Browser', $result['browser']);
+    }
+
+    #[Test]
+    public function it_can_detect_duckduckgo_browser_via_user_agent(): void
+    {
+        $request = Request::create('/', 'GET');
+        $request->headers->set('User-Agent', 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36 DuckDuckGo/5');
+
+        $result = LaraTrack::detect($request);
+
+        $this->assertEquals('DuckDuckGo Browser', $result['browser']);
+        $this->assertTrue($result['is_mobile']);
+    }
+
+    #[Test]
+    public function it_can_detect_duckduckgo_browser_on_ios_via_x_requested_with(): void
+    {
+        $request = Request::create('/', 'GET');
+        $request->headers->set('User-Agent', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1');
+        $request->headers->set('X-Requested-With', 'com.duckduckgo.mobile.ios');
+
+        $result = LaraTrack::detect($request);
+
+        $this->assertEquals('DuckDuckGo Browser', $result['browser']);
+        $this->assertTrue($result['is_mobile']);
+    }
+
+    #[Test]
+    public function it_can_detect_tor_browser(): void
+    {
+        $request = Request::create('/', 'GET');
+        // Tor Browser UA has (Windows NT X.X; rv:Y.0) without Win64/x64 — unlike standard Firefox
+        $request->headers->set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; rv:115.0) Gecko/20100101 Firefox/115.0');
+
+        $result = LaraTrack::detect($request);
+
+        $this->assertEquals('Tor Browser', $result['browser']);
+        $this->assertEquals('115.0', $result['browser_version']);
+        $this->assertTrue($result['is_desktop']);
+    }
+
+    #[Test]
+    public function it_does_not_misdetect_firefox_as_tor(): void
+    {
+        $request = Request::create('/', 'GET');
+        // Standard Firefox includes Win64; x64 — Tor Browser does not
+        $request->headers->set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0');
+
+        $result = LaraTrack::detect($request);
+
+        $this->assertEquals('Firefox', $result['browser']);
+    }
+
+    #[Test]
     public function it_returns_unknown_for_empty_user_agent(): void
     {
         $request = Request::create('/', 'GET');

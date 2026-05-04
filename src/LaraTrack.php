@@ -211,36 +211,34 @@ class LaraTrack
         $secChUa        = strtolower($this->request->header('Sec-CH-UA', ''));
         $xRequestedWith = strtolower($this->request->header('X-Requested-With', ''));
 
-        $browsers = [
-            'Brave'            => ['/brave/i', '/Brave/'],
-            'Kahf'             => ['/kahf/'],
-            'DuckDuckGo'       => ['/duckduckgo/', '/ddg/i'],
-            'Microsoft Edge'   => ['/edg\//i', '/edge\//i'],
-            'Opera GX'         => ['/oprgx/i'],
-            'Opera'            => ['/opr\//i', '/opera/i'],
-            'Vivaldi'          => ['/vivaldi/i'],
-            'Samsung Internet' => ['/samsungbrowser/i'],
-            'UC Browser'       => ['/ucbrowser/i'],
-            'Google Chrome'    => ['/chrome/i'],
-            'Safari'           => ['/safari/i'],
-            'Firefox'          => ['/firefox/i'],
-            'Internet Explorer'=> ['/msie|trident/i'],
-            'Tor Browser'      => ['/tor/i'],
-            'Chromium'         => ['/chromium/i'],
-        ];
-
+        // X-Requested-With based detection for mobile apps (takes priority)
         if (!empty($xRequestedWith)) {
-            $name    = 'Unknown';
-            $version = '';
             if (str_contains($xRequestedWith, 'io.kahf.browser')) {
-                $name    = 'Kahf Browser';
-                $version = $this->extractVersion($userAgent, 'Kahf');
-            } elseif (str_contains($xRequestedWith, 'com.duckduckgo.mobile')) {
-                $name    = 'DuckDuckGo Browser';
-                $version = $this->extractVersion($userAgent, 'DuckDuckGo');
+                return ['name' => 'Kahf Browser', 'version' => $this->extractVersion($userAgent, 'Kahf Browser')];
             }
-            return ['name' => $name, 'version' => $version];
+            if (str_contains($xRequestedWith, 'com.duckduckgo.mobile')) {
+                return ['name' => 'DuckDuckGo Browser', 'version' => $this->extractVersion($userAgent, 'DuckDuckGo Browser')];
+            }
         }
+
+        $browsers = [
+            'Brave'              => ['/brave/i'],
+            'Kahf Browser'       => ['/kahf/i'],
+            'DuckDuckGo Browser' => ['/duckduckgo/i'],
+            'Microsoft Edge'     => ['/edg\//i', '/edge\//i'],
+            'Opera GX'           => ['/oprgx/i'],
+            'Opera'              => ['/opr\//i', '/opera/i'],
+            'Vivaldi'            => ['/vivaldi/i'],
+            'Samsung Internet'   => ['/samsungbrowser/i'],
+            'UC Browser'         => ['/ucbrowser/i'],
+            // Tor Browser UA: (Windows NT X.X; rv:Y.0) with no Win64/x64 — unlike standard Firefox
+            'Tor Browser'        => ['/\(windows nt \d+\.\d+; rv:\d+\.\d+\) gecko\/\d+ firefox/i'],
+            'Google Chrome'      => ['/chrome/i'],
+            'Safari'             => ['/safari/i'],
+            'Firefox'            => ['/firefox/i'],
+            'Internet Explorer'  => ['/msie|trident/i'],
+            'Chromium'           => ['/chromium/i'],
+        ];
 
         if (!empty($secChUa)) {
             foreach ($browsers as $name => $patterns) {
@@ -255,9 +253,6 @@ class LaraTrack
         foreach ($browsers as $name => $patterns) {
             foreach ($patterns as $pattern) {
                 if (preg_match($pattern, $userAgent)) {
-                    if ($name === 'Safari' && preg_match('/ddg/i', $userAgent)) {
-                        $name = 'DuckDuckGo';
-                    }
                     return ['name' => $name, 'version' => $this->extractVersion($userAgent, $name)];
                 }
             }
@@ -269,16 +264,19 @@ class LaraTrack
     protected function extractVersion(string $userAgent, string $browser): string
     {
         $patterns = [
-            'Kahf'             => '/kahf\/([0-9\.]+)/i',
-            'DuckDuckGo'       => '/(?:duckduckgo|ddg)\/([0-9\.]+)/i',
-            'Google Chrome'    => '/chrome\/([0-9\.]+)/i',
-            'Firefox'          => '/firefox\/([0-9\.]+)/i',
-            'Safari'           => '/version\/([0-9\.]+)/i',
-            'Microsoft Edge'   => '/edg\/([0-9\.]+)/i',
-            'Opera'            => '/opr\/([0-9\.]+)/i',
-            'Samsung Internet' => '/samsungbrowser\/([0-9\.]+)/i',
-            'Brave'            => '/chrome\/([0-9\.]+)/i',
-            'Vivaldi'          => '/vivaldi\/([0-9\.]+)/i',
+            'Kahf Browser'       => '/kahf\/([0-9\.]+)/i',
+            'DuckDuckGo Browser' => '/duckduckgo\/([0-9\.]+)/i',
+            'Tor Browser'        => '/firefox\/([0-9\.]+)/i',
+            'Google Chrome'      => '/chrome\/([0-9\.]+)/i',
+            'Firefox'            => '/firefox\/([0-9\.]+)/i',
+            'Safari'             => '/version\/([0-9\.]+)/i',
+            'Microsoft Edge'     => '/edg\/([0-9\.]+)/i',
+            'Opera'              => '/opr\/([0-9\.]+)/i',
+            'Opera GX'           => '/oprgx\/([0-9\.]+)/i',
+            'Samsung Internet'   => '/samsungbrowser\/([0-9\.]+)/i',
+            'Brave'              => '/chrome\/([0-9\.]+)/i',
+            'Vivaldi'            => '/vivaldi\/([0-9\.]+)/i',
+            'Internet Explorer'  => '/(?:msie |rv:)([0-9\.]+)/i',
         ];
 
         if (isset($patterns[$browser]) && preg_match($patterns[$browser], $userAgent, $matches)) {
