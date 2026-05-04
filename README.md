@@ -4,9 +4,9 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/sajidwarner/laravel-device-detector.svg?style=flat-square)](https://packagist.org/packages/sajidwarner/laravel-device-detector)
 [![PHP Version](https://img.shields.io/packagist/php-v/sajidwarner/laravel-device-detector.svg?style=flat-square)](https://packagist.org/packages/sajidwarner/laravel-device-detector)
 [![License](https://img.shields.io/packagist/l/sajidwarner/laravel-device-detector.svg?style=flat-square)](LICENSE.md)
-[![Tests](https://img.shields.io/badge/tests-33%20passing-brightgreen?style=flat-square)](#testing)
+[![Tests](https://img.shields.io/badge/tests-36%20passing-brightgreen?style=flat-square)](#testing)
 
-A powerful Laravel package for **browser detection**, **device detection**, **IP geolocation**, **bot/robot detection**, **Tor detection**, and **platform detection** using user agent parsing and modern Client Hints (`Sec-CH-UA`). Supports Laravel 10, 11, and 12 with PHP 8.1+.
+A powerful Laravel package for **browser detection**, **device detection**, **IP geolocation**, **VPN/Proxy detection**, **bot/robot detection**, **Tor detection**, **language detection**, and **platform detection** — with built-in middleware, Laravel events, and Artisan commands. Supports Laravel 10, 11, and 12 with PHP 8.1+.
 
 ## Features
 
@@ -16,11 +16,16 @@ A powerful Laravel package for **browser detection**, **device detection**, **IP
 - 📊 **Tablet Detection** — iPad, Android tablets, Kindle, and more
 - 🤖 **Robot / Bot Detection** — 26+ bots: Googlebot, Bingbot, Facebook, Twitter, LinkedIn, WhatsApp, Telegram, Semrush, Ahrefs, and more
 - 🔒 **Tor Detection** — Real-time Tor exit node detection with caching
+- 🛡️ **VPN & Proxy Detection** — Detect VPN and proxy connections via geolocation security data
 - 🗺️ **IP Geolocation** — Country, city, timezone, ISP, currency via [ipgeolocation.io](https://app.ipgeolocation.io/signup?referral=AFF-YWEVCOJFNY) (free plan available)
-- 🖥️ **Platform / OS Detection** — Windows 10, macOS, Linux, Android, iOS, Chrome OS, BlackBerry, and more
-- ⚡ **Performance** — Per-IP caching for geolocation and Tor nodes
+- 🌍 **Language Detection** — Detect visitor's preferred language from `Accept-Language` header
+- 🖥️ **Platform / OS Detection** — Windows 10, macOS, Linux, Android, iOS, Chrome OS, and more
+- 🚧 **Built-in Middleware** — Block bots, Tor, VPN, specific countries, or restrict to mobile/desktop
+- ⚡ **Laravel Events** — Fire events on bot, Tor, or VPN detection
+- 🖥️ **Artisan Commands** — `laratrack:test`, `laratrack:clear-cache`
 - 🎯 **Client Hints Support** — Uses modern `Sec-CH-UA` headers as primary detection method
-- 🔧 **Blade Directives** — `@mobile`, `@tablet`, `@desktop`, `@robot`, `@tor`
+- 🔧 **Blade Directives** — `@mobile`, `@tablet`, `@desktop`, `@robot`, `@tor`, `@vpn`, `@proxy`
+- ⚡ **Performance** — Per-IP caching for geolocation and Tor nodes
 
 ## Installation
 
@@ -57,15 +62,18 @@ php artisan vendor:publish --provider="SajidWarner\LaraTrack\LaraTrackServicePro
 ```php
 use SajidWarner\LaraTrack\Facades\LaraTrack;
 
-$browser  = LaraTrack::getBrowser();       // "Google Chrome"
-$platform = LaraTrack::getPlatform();      // "Windows 10"
-$type     = LaraTrack::getDeviceType();    // "desktop" | "mobile" | "tablet"
-$isMobile = LaraTrack::isMobile();         // true / false
-$isTablet = LaraTrack::isTablet();         // true / false
-$isDesktop= LaraTrack::isDesktop();        // true / false
-$isRobot  = LaraTrack::isRobot();          // true / false
-$isTor    = LaraTrack::isTor();            // true / false
-$location = LaraTrack::getLocation();      // array (when geolocation enabled)
+$browser   = LaraTrack::getBrowser();     // "Google Chrome"
+$platform  = LaraTrack::getPlatform();    // "Windows 10"
+$type      = LaraTrack::getDeviceType();  // "desktop" | "mobile" | "tablet"
+$language  = LaraTrack::getLanguage();    // "en-US", "bn-BD" ...
+$isMobile  = LaraTrack::isMobile();       // true / false
+$isTablet  = LaraTrack::isTablet();       // true / false
+$isDesktop = LaraTrack::isDesktop();      // true / false
+$isRobot   = LaraTrack::isRobot();        // true / false
+$isTor     = LaraTrack::isTor();          // true / false
+$isVpn     = LaraTrack::isVpn();          // true / false
+$isProxy   = LaraTrack::isProxy();        // true / false
+$location  = LaraTrack::getLocation();    // array (when geolocation enabled)
 ```
 
 ### Full Detection Array
@@ -86,7 +94,10 @@ $data = LaraTrack::detect();
     'is_desktop'      => true,
     'is_robot'        => false,
     'is_tor'          => false,
+    'is_vpn'          => false,
+    'is_proxy'        => false,
     'robot_name'      => null,
+    'language'        => 'en-US',
     'ip'              => '192.168.1.1',
     'location'        => [                  // only when geolocation is enabled
         'country'       => 'Bangladesh',
@@ -133,38 +144,185 @@ class HomeController extends Controller
 }
 ```
 
-### Middleware — Block Tor or Bots
+## Middleware
 
-```bash
-php artisan make:middleware BlockTor
-```
+LaraTrack registers 6 middleware aliases automatically — no manual registration needed.
+
+### Available Middleware
 
 ```php
-use SajidWarner\LaraTrack\Facades\LaraTrack;
+// Block all bots/crawlers
+Route::middleware('laratrack.block-bots')->group(function () {
+    Route::get('/members', MembersController::class);
+});
 
-public function handle($request, Closure $next)
+// Block Tor connections
+Route::middleware('laratrack.block-tor')->group(function () {
+    Route::post('/checkout', CheckoutController::class);
+});
+
+// Block VPN and Proxy connections
+Route::middleware('laratrack.block-vpn')->group(function () {
+    Route::post('/login', LoginController::class);
+});
+
+// Allow mobile devices only
+Route::middleware('laratrack.mobile-only')->group(function () {
+    Route::get('/app', AppController::class);
+});
+
+// Allow desktop only
+Route::middleware('laratrack.desktop-only')->group(function () {
+    Route::get('/dashboard', DashboardController::class);
+});
+
+// Block specific countries (inline)
+Route::middleware('laratrack.block-countries:CN,RU,KP')->group(function () {
+    Route::get('/api', ApiController::class);
+});
+```
+
+### Country Blocking via Config
+
+Block countries globally in `config/laratrack.php`:
+
+```php
+'blocked_countries' => ['CN', 'RU', 'KP'],
+```
+
+Then just apply the middleware without parameters:
+
+```php
+Route::middleware('laratrack.block-countries')->group(...);
+```
+
+### Custom Middleware Messages / Redirects
+
+```php
+// config/laratrack.php
+'middleware' => [
+    'bot_message'          => 'Bots are not allowed.',
+    'tor_message'          => 'Tor connections are not allowed.',
+    'vpn_message'          => 'VPN/Proxy connections are not allowed.',
+    'country_message'      => 'Your country is not allowed.',
+    'mobile_only_message'  => 'Please use a mobile device.',
+    'desktop_only_message' => 'Please use a desktop browser.',
+    'mobile_redirect'      => '/download-app', // redirect desktop users
+    'desktop_redirect'     => '/desktop-only', // redirect mobile users
+],
+```
+
+## Events
+
+LaraTrack fires Laravel events automatically when threats are detected. Listen to them in your `EventServiceProvider` or using `#[AsEventListener]`.
+
+```php
+// app/Providers/EventServiceProvider.php
+protected $listen = [
+    \SajidWarner\LaraTrack\Events\BotDetected::class  => [App\Listeners\HandleBot::class],
+    \SajidWarner\LaraTrack\Events\TorDetected::class  => [App\Listeners\HandleTor::class],
+    \SajidWarner\LaraTrack\Events\VpnDetected::class  => [App\Listeners\HandleVpn::class],
+];
+```
+
+### Event Payloads
+
+```php
+// BotDetected
+$event->request;  // Illuminate\Http\Request
+$event->botName;  // "Googlebot"
+$event->ip;       // "66.249.66.1"
+
+// TorDetected
+$event->request;
+$event->ip;
+
+// VpnDetected
+$event->request;
+$event->ip;
+$event->type;     // "vpn" or "proxy"
+```
+
+### Example Listener
+
+```php
+namespace App\Listeners;
+
+use SajidWarner\LaraTrack\Events\BotDetected;
+use Illuminate\Support\Facades\Log;
+
+class HandleBot
 {
-    if (LaraTrack::isTor($request)) {
-        return response('Tor connections not allowed', 403);
+    public function handle(BotDetected $event): void
+    {
+        Log::warning("Bot detected: {$event->botName} from IP {$event->ip}");
     }
-
-    return $next($request);
 }
 ```
 
-### Blade Directives
+Disable events in config if not needed:
+
+```php
+'fire_events' => false,
+```
+
+## Artisan Commands
+
+### Test Detection
+
+Test LaraTrack detection from the terminal with any User-Agent string:
+
+```bash
+# Default Chrome UA
+php artisan laratrack:test
+
+# Custom User-Agent
+php artisan laratrack:test "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15"
+
+# With IP (for geolocation)
+php artisan laratrack:test "Mozilla/5.0 Chrome/120.0.0.0" --ip=8.8.8.8
+```
+
+Example output:
+```
+LaraTrack Detection Result
+─────────────────────────────────
++──────────────+──────────────────────+
+| Field        | Value                |
++──────────────+──────────────────────+
+| Browser      | Google Chrome 120.0  |
+| Platform     | Windows 10           |
+| Device Type  | desktop              |
+| Is Mobile    | No                   |
+| Is Robot     | No                   |
+| Is Tor       | No                   |
+| Is VPN       | No                   |
+| Language     | en-US                |
+| IP           | 8.8.8.8              |
++──────────────+──────────────────────+
+```
+
+### Clear Cache
+
+```bash
+php artisan laratrack:clear-cache
+```
+
+Clears cached Tor exit nodes and all geolocation results.
+
+## Blade Directives
 
 ```blade
 @mobile
-    <p>This is shown only on mobile devices</p>
+    <p>Shown only on mobile</p>
 @endmobile
 
 @tablet
-    <p>This is shown only on tablets</p>
+    <p>Shown only on tablets</p>
 @endtablet
 
 @desktop
-    <p>This is shown only on desktop</p>
+    <p>Shown only on desktop</p>
 @enddesktop
 
 @robot
@@ -174,6 +332,14 @@ public function handle($request, Closure $next)
 @tor
     <p>Tor browser detected</p>
 @endtor
+
+@vpn
+    <p>VPN connection detected</p>
+@endvpn
+
+@proxy
+    <p>Proxy connection detected</p>
+@endproxy
 ```
 
 ## IP Geolocation
@@ -273,18 +439,41 @@ Windows 10, Windows 8.1, Windows 8, Windows 7, Windows Vista, Windows XP, macOS,
 
 ## Configuration
 
-Edit `config/laratrack.php` or use `.env` variables:
+Full `config/laratrack.php`:
 
 ```php
 return [
-    'enable_tor_detection'         => env('LARATRACK_TOR_DETECTION', true),
-    'tor_cache_duration'           => env('LARATRACK_TOR_CACHE', 3600),
-    'tor_exit_node_url'            => env('LARATRACK_TOR_URL', 'https://check.torproject.org/exit-addresses'),
-    'enable_robot_detection'       => env('LARATRACK_ROBOT_DETECTION', true),
-    'enable_ip_geolocation'        => env('LARATRACK_GEO_ENABLED', false),
-    'ip_geolocation_api_key'       => env('LARATRACK_GEO_API_KEY', ''),
-    'ip_geolocation_api_url'       => env('LARATRACK_GEO_URL', 'https://api.ipgeolocation.io/v3/ipgeo'),
-    'ip_geolocation_cache_duration'=> env('LARATRACK_GEO_CACHE', 3600),
+    // Tor Detection
+    'enable_tor_detection' => env('LARATRACK_TOR_DETECTION', true),
+    'tor_cache_duration'   => env('LARATRACK_TOR_CACHE', 3600),
+    'tor_exit_node_url'    => env('LARATRACK_TOR_URL', 'https://check.torproject.org/exit-addresses'),
+
+    // Robot Detection
+    'enable_robot_detection' => env('LARATRACK_ROBOT_DETECTION', true),
+
+    // IP Geolocation
+    'enable_ip_geolocation'         => env('LARATRACK_GEO_ENABLED', false),
+    'ip_geolocation_api_key'        => env('LARATRACK_GEO_API_KEY', ''),
+    'ip_geolocation_api_url'        => env('LARATRACK_GEO_URL', 'https://api.ipgeolocation.io/v3/ipgeo'),
+    'ip_geolocation_cache_duration' => env('LARATRACK_GEO_CACHE', 3600),
+
+    // Events
+    'fire_events' => env('LARATRACK_FIRE_EVENTS', true),
+
+    // Country Blocking
+    'blocked_countries' => [],
+
+    // Middleware Messages & Redirects
+    'middleware' => [
+        'bot_message'          => 'Access denied: bots are not allowed.',
+        'tor_message'          => 'Access denied: Tor connections are not allowed.',
+        'vpn_message'          => 'Access denied: VPN/Proxy connections are not allowed.',
+        'country_message'      => 'Access denied: your country is not allowed.',
+        'mobile_only_message'  => 'This page is only available on mobile devices.',
+        'desktop_only_message' => 'This page is only available on desktop.',
+        'mobile_redirect'      => null,
+        'desktop_redirect'     => null,
+    ],
 ];
 ```
 
@@ -310,7 +499,7 @@ return [
 composer test
 ```
 
-33 tests · 80 assertions · all passing ✅
+36 tests · 86 assertions · all passing ✅
 
 ## API Routes (Non-Production Only)
 
@@ -337,8 +526,8 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 
 ## Support
 
-For support, please open an issue on [GitHub](https://github.com/sajidwarner/laravel-device-detector).
+For support, please open an issue on [GitHub](https://github.com/sajidwarner/laratrack).
 
 ---
 
-**Keywords:** laravel device detector, laravel browser detection, laravel user agent parser, laravel mobile detection, laravel ip geolocation, laravel bot detection, laravel tor detection, php device detection, laravel package, user agent detection laravel
+**Keywords:** laratrack, laravel device detector, laravel browser detection, laravel user agent parser, laravel mobile detection, laravel ip geolocation, laravel bot detection, laravel tor detection, laravel vpn detection, laravel middleware, php device detection, laravel package
