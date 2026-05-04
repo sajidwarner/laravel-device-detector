@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use SajidWarner\DeviceDetector\Http\Controllers\DeviceDetectorController;
+use SajidWarner\LaraTrack\Http\Controllers\LaraTrackController;
 
-Route::get('/device-detector/test', [DeviceDetectorController::class, 'test'])
-    ->name('device-detector.test');
+Route::get('/laratrack/test', [LaraTrackController::class, 'test'])
+    ->name('laratrack.test');

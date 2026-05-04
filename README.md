@@ -1,4 +1,4 @@
-# Laravel Device Detector
+# LaraTrack
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/sajidwarner/laravel-device-detector.svg?style=flat-square)](https://packagist.org/packages/sajidwarner/laravel-device-detector)
 [![Total Downloads](https://img.shields.io/packagist/dt/sajidwarner/laravel-device-detector.svg?style=flat-square)](https://packagist.org/packages/sajidwarner/laravel-device-detector)
@@ -36,18 +36,18 @@ If auto-discovery is disabled, add to `config/app.php`:
 
 ```php
 'providers' => [
-    SajidWarner\DeviceDetector\DeviceDetectorServiceProvider::class,
+    SajidWarner\LaraTrack\LaraTrackServiceProvider::class,
 ],
 
 'aliases' => [
-    'DeviceDetector' => SajidWarner\DeviceDetector\Facades\DeviceDetector::class,
+    'LaraTrack' => SajidWarner\LaraTrack\Facades\LaraTrack::class,
 ],
 ```
 
 ### Publish Configuration
 
 ```bash
-php artisan vendor:publish --provider="SajidWarner\DeviceDetector\DeviceDetectorServiceProvider"
+php artisan vendor:publish --provider="SajidWarner\LaraTrack\LaraTrackServiceProvider"
 ```
 
 ## Usage
@@ -55,23 +55,23 @@ php artisan vendor:publish --provider="SajidWarner\DeviceDetector\DeviceDetector
 ### Basic Usage
 
 ```php
-use SajidWarner\DeviceDetector\Facades\DeviceDetector;
+use SajidWarner\LaraTrack\Facades\LaraTrack;
 
-$browser  = DeviceDetector::getBrowser();       // "Google Chrome"
-$platform = DeviceDetector::getPlatform();      // "Windows 10"
-$type     = DeviceDetector::getDeviceType();    // "desktop" | "mobile" | "tablet"
-$isMobile = DeviceDetector::isMobile();         // true / false
-$isTablet = DeviceDetector::isTablet();         // true / false
-$isDesktop= DeviceDetector::isDesktop();        // true / false
-$isRobot  = DeviceDetector::isRobot();          // true / false
-$isTor    = DeviceDetector::isTor();            // true / false
-$location = DeviceDetector::getLocation();      // array (when geolocation enabled)
+$browser  = LaraTrack::getBrowser();       // "Google Chrome"
+$platform = LaraTrack::getPlatform();      // "Windows 10"
+$type     = LaraTrack::getDeviceType();    // "desktop" | "mobile" | "tablet"
+$isMobile = LaraTrack::isMobile();         // true / false
+$isTablet = LaraTrack::isTablet();         // true / false
+$isDesktop= LaraTrack::isDesktop();        // true / false
+$isRobot  = LaraTrack::isRobot();          // true / false
+$isTor    = LaraTrack::isTor();            // true / false
+$location = LaraTrack::getLocation();      // array (when geolocation enabled)
 ```
 
 ### Full Detection Array
 
 ```php
-$data = DeviceDetector::detect();
+$data = LaraTrack::detect();
 
 /*
 [
@@ -112,13 +112,13 @@ $data = DeviceDetector::detect();
 
 ```php
 use Illuminate\Http\Request;
-use SajidWarner\DeviceDetector\Facades\DeviceDetector;
+use SajidWarner\LaraTrack\Facades\LaraTrack;
 
 class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        $device = DeviceDetector::detect($request);
+        $device = LaraTrack::detect($request);
 
         if ($device['is_mobile']) {
             return view('mobile.home', compact('device'));
@@ -140,11 +140,11 @@ php artisan make:middleware BlockTor
 ```
 
 ```php
-use SajidWarner\DeviceDetector\Facades\DeviceDetector;
+use SajidWarner\LaraTrack\Facades\LaraTrack;
 
 public function handle($request, Closure $next)
 {
-    if (DeviceDetector::isTor($request)) {
+    if (LaraTrack::isTor($request)) {
         return response('Tor connections not allowed', 403);
     }
 
@@ -190,14 +190,14 @@ Get real-time location data for any visitor IP using [ipgeolocation.io](https://
 2. Add to your `.env` file (**never commit your API key to git**):
 
 ```env
-DEVICE_DETECTOR_GEO_ENABLED=true
-DEVICE_DETECTOR_GEO_API_KEY=your_own_api_key_here
+LARATRACK_GEO_ENABLED=true
+LARATRACK_GEO_API_KEY=your_own_api_key_here
 ```
 
 3. Use in your application:
 
 ```php
-$location = DeviceDetector::getLocation();
+$location = LaraTrack::getLocation();
 
 echo $location['country'];      // Bangladesh
 echo $location['city'];         // Dhaka
@@ -273,18 +273,18 @@ Windows 10, Windows 8.1, Windows 8, Windows 7, Windows Vista, Windows XP, macOS,
 
 ## Configuration
 
-Edit `config/device-detector.php` or use `.env` variables:
+Edit `config/laratrack.php` or use `.env` variables:
 
 ```php
 return [
-    'enable_tor_detection'         => env('DEVICE_DETECTOR_TOR_DETECTION', true),
-    'tor_cache_duration'           => env('DEVICE_DETECTOR_TOR_CACHE', 3600),
-    'tor_exit_node_url'            => env('DEVICE_DETECTOR_TOR_URL', 'https://check.torproject.org/exit-addresses'),
-    'enable_robot_detection'       => env('DEVICE_DETECTOR_ROBOT_DETECTION', true),
-    'enable_ip_geolocation'        => env('DEVICE_DETECTOR_GEO_ENABLED', false),
-    'ip_geolocation_api_key'       => env('DEVICE_DETECTOR_GEO_API_KEY', ''),
-    'ip_geolocation_api_url'       => env('DEVICE_DETECTOR_GEO_URL', 'https://api.ipgeolocation.io/v3/ipgeo'),
-    'ip_geolocation_cache_duration'=> env('DEVICE_DETECTOR_GEO_CACHE', 3600),
+    'enable_tor_detection'         => env('LARATRACK_TOR_DETECTION', true),
+    'tor_cache_duration'           => env('LARATRACK_TOR_CACHE', 3600),
+    'tor_exit_node_url'            => env('LARATRACK_TOR_URL', 'https://check.torproject.org/exit-addresses'),
+    'enable_robot_detection'       => env('LARATRACK_ROBOT_DETECTION', true),
+    'enable_ip_geolocation'        => env('LARATRACK_GEO_ENABLED', false),
+    'ip_geolocation_api_key'       => env('LARATRACK_GEO_API_KEY', ''),
+    'ip_geolocation_api_url'       => env('LARATRACK_GEO_URL', 'https://api.ipgeolocation.io/v3/ipgeo'),
+    'ip_geolocation_cache_duration'=> env('LARATRACK_GEO_CACHE', 3600),
 ];
 ```
 
@@ -315,7 +315,7 @@ composer test
 ## API Routes (Non-Production Only)
 
 ```
-GET /device-detector/test
+GET /laratrack/test
 ```
 
 Returns JSON with full detection data including headers. Disabled automatically in production.

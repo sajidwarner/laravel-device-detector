@@ -1,8 +1,9 @@
 {
     "name": "sajidwarner/laravel-device-detector",
-    "description": "Laravel package for browser detection, device detection, IP geolocation, bot detection, Tor detection, and platform detection using user agent parsing and Client Hints",
+    "description": "LaraTrack — Laravel package for browser detection, device detection, IP geolocation, bot detection, Tor detection and platform detection",
     "keywords": [
         "laravel",
+        "laratrack",
         "device-detector",
         "device-detection",
         "browser-detection",
@@ -50,12 +51,12 @@
     },
     "autoload": {
         "psr-4": {
-            "SajidWarner\\DeviceDetector\\": "src/"
+            "SajidWarner\\LaraTrack\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "SajidWarner\\DeviceDetector\\Tests\\": "tests/"
+            "SajidWarner\\LaraTrack\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -65,10 +66,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "SajidWarner\\DeviceDetector\\DeviceDetectorServiceProvider"
+                "SajidWarner\\LaraTrack\\LaraTrackServiceProvider"
             ],
             "aliases": {
-                "DeviceDetector": "SajidWarner\\DeviceDetector\\Facades\\DeviceDetector"
+                "LaraTrack": "SajidWarner\\LaraTrack\\Facades\\LaraTrack"
             }
         }
     },

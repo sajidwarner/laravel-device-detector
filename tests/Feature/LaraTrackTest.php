@@ -1,15 +1,15 @@
 <?php
 
-namespace SajidWarner\DeviceDetector\Tests\Feature;
+namespace SajidWarner\LaraTrack\Tests\Feature;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use PHPUnit\Framework\Attributes\Test;
-use SajidWarner\DeviceDetector\Facades\DeviceDetector;
-use SajidWarner\DeviceDetector\Tests\TestCase;
+use SajidWarner\LaraTrack\Facades\LaraTrack;
+use SajidWarner\LaraTrack\Tests\TestCase;
 
-class DeviceDetectorTest extends TestCase
+class LaraTrackTest extends TestCase
 {
     // -------------------------------------------------------------------------
     // Browser Detection
@@ -21,7 +21,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEquals('Google Chrome', $result['browser']);
         $this->assertTrue($result['is_desktop']);
@@ -35,7 +35,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEquals('Firefox', $result['browser']);
         $this->assertEquals('Windows 10', $result['platform']);
@@ -48,7 +48,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEquals('Safari', $result['browser']);
         $this->assertEquals('macOS', $result['platform']);
@@ -60,7 +60,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEquals('Microsoft Edge', $result['browser']);
     }
@@ -71,7 +71,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 SamsungBrowser/21.0 Chrome/110.0.5481.154 Mobile Safari/537.36');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEquals('Samsung Internet', $result['browser']);
     }
@@ -82,7 +82,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 OPR/106.0.0.0');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEquals('Opera', $result['browser']);
     }
@@ -93,7 +93,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', '');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEquals('Unknown', $result['browser']);
         $this->assertEquals('', $result['browser_version']);
@@ -109,7 +109,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEquals('Windows 10', $result['platform']);
     }
@@ -120,7 +120,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 13_5) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEquals('macOS', $result['platform']);
     }
@@ -131,7 +131,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEquals('Linux', $result['platform']);
     }
@@ -142,7 +142,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEquals('Android', $result['platform']);
     }
@@ -153,7 +153,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEquals('iOS (iPhone)', $result['platform']);
     }
@@ -168,7 +168,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertTrue($result['is_mobile']);
         $this->assertFalse($result['is_desktop']);
@@ -183,7 +183,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertTrue($result['is_tablet']);
         $this->assertFalse($result['is_mobile']);
@@ -197,7 +197,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertTrue($result['is_desktop']);
         $this->assertFalse($result['is_mobile']);
@@ -215,7 +215,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEquals('Samsung', $result['device_brand']);
         $this->assertTrue($result['is_mobile']);
@@ -228,7 +228,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Linux; Android 13; Redmi Note 12 Pro) AppleWebKit/537.36');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEquals('Xiaomi', $result['device_brand']);
         $this->assertStringContainsString('Redmi', $result['device_model']);
@@ -240,7 +240,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Linux; Android 10; Huawei P30 Pro) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEquals('Huawei', $result['device_brand']);
     }
@@ -251,7 +251,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Linux; Android 13; OnePlus 11) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEquals('OnePlus', $result['device_brand']);
     }
@@ -262,7 +262,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEquals('Google', $result['device_brand']);
         $this->assertStringContainsString('Pixel', $result['device_model']);
@@ -274,7 +274,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Linux; Android 13; moto g84 5g) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEquals('Motorola', $result['device_brand']);
     }
@@ -289,7 +289,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertTrue($result['is_robot']);
         $this->assertEquals('Googlebot', $result['robot_name']);
@@ -301,7 +301,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertTrue($result['is_robot']);
         $this->assertEquals('Bingbot', $result['robot_name']);
@@ -313,7 +313,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertTrue($result['is_robot']);
         $this->assertEquals('Facebookbot', $result['robot_name']);
@@ -325,7 +325,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Twitterbot/1.0');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertTrue($result['is_robot']);
         $this->assertEquals('Twitterbot', $result['robot_name']);
@@ -337,7 +337,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertFalse($result['is_robot']);
         $this->assertNull($result['robot_name']);
@@ -353,12 +353,12 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
-        $this->assertFalse(DeviceDetector::isMobile($request));
-        $this->assertTrue(DeviceDetector::isDesktop($request));
-        $this->assertFalse(DeviceDetector::isRobot($request));
-        $this->assertEquals('Google Chrome', DeviceDetector::getBrowser($request));
-        $this->assertEquals('desktop', DeviceDetector::getDeviceType($request));
-        $this->assertEquals('Windows 10', DeviceDetector::getPlatform($request));
+        $this->assertFalse(LaraTrack::isMobile($request));
+        $this->assertTrue(LaraTrack::isDesktop($request));
+        $this->assertFalse(LaraTrack::isRobot($request));
+        $this->assertEquals('Google Chrome', LaraTrack::getBrowser($request));
+        $this->assertEquals('desktop', LaraTrack::getDeviceType($request));
+        $this->assertEquals('Windows 10', LaraTrack::getPlatform($request));
     }
 
     // -------------------------------------------------------------------------
@@ -371,7 +371,7 @@ class DeviceDetectorTest extends TestCase
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0) Chrome/120.0.0.0 Safari/537.36');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertIsArray($result['location']);
         $this->assertEmpty($result['location']);
@@ -380,13 +380,13 @@ class DeviceDetectorTest extends TestCase
     #[Test]
     public function it_returns_empty_location_when_api_key_is_missing(): void
     {
-        config(['device-detector.enable_ip_geolocation' => true]);
-        config(['device-detector.ip_geolocation_api_key' => '']);
+        config(['laratrack.enable_ip_geolocation' => true]);
+        config(['laratrack.ip_geolocation_api_key' => '']);
 
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 Chrome/120.0.0.0 Safari/537.36');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertEmpty($result['location']);
     }
@@ -396,34 +396,33 @@ class DeviceDetectorTest extends TestCase
     {
         Http::fake([
             'api.ipgeolocation.io/*' => Http::response([
-                'ip' => '8.8.8.8',
+                'ip'           => '8.8.8.8',
                 'country_name' => 'United States',
-                'country_code2' => 'US',
-                'city' => 'Mountain View',
-                'state_prov' => 'California',
-                'district' => '',
-                'zipcode' => '94043',
-                'latitude' => '37.38605',
-                'longitude' => '-122.08385',
-                'time_zone' => ['name' => 'America/Los_Angeles'],
-                'isp' => 'Google LLC',
+                'country_code2'=> 'US',
+                'city'         => 'Mountain View',
+                'state_prov'   => 'California',
+                'district'     => '',
+                'zipcode'      => '94043',
+                'latitude'     => '37.38605',
+                'longitude'    => '-122.08385',
+                'time_zone'    => ['name' => 'America/Los_Angeles'],
+                'isp'          => 'Google LLC',
                 'organization' => 'AS15169 Google LLC',
-                'currency' => ['code' => 'USD'],
+                'currency'     => ['code' => 'USD'],
                 'calling_code' => '+1',
-                'is_eu' => false,
+                'is_eu'        => false,
             ], 200),
         ]);
 
         Cache::flush();
-
-        config(['device-detector.enable_ip_geolocation' => true]);
-        config(['device-detector.ip_geolocation_api_key' => 'test-api-key']);
+        config(['laratrack.enable_ip_geolocation' => true]);
+        config(['laratrack.ip_geolocation_api_key' => 'test-api-key']);
 
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 Chrome/120.0.0.0 Safari/537.36');
         $request->headers->set('X-Real-IP', '8.8.8.8');
 
-        $result = DeviceDetector::detect($request);
+        $result   = LaraTrack::detect($request);
         $location = $result['location'];
 
         $this->assertNotEmpty($location);
@@ -443,36 +442,32 @@ class DeviceDetectorTest extends TestCase
         Http::fake([
             'api.ipgeolocation.io/*' => Http::response([
                 'country_name' => 'Bangladesh',
-                'country_code2' => 'BD',
-                'city' => 'Dhaka',
-                'state_prov' => 'Dhaka Division',
-                'district' => 'Dhaka',
-                'zipcode' => '1000',
-                'latitude' => '23.72305',
-                'longitude' => '90.40860',
-                'time_zone' => ['name' => 'Asia/Dhaka'],
-                'isp' => 'Ranks ITT',
+                'country_code2'=> 'BD',
+                'city'         => 'Dhaka',
+                'state_prov'   => 'Dhaka Division',
+                'district'     => 'Dhaka',
+                'zipcode'      => '1000',
+                'latitude'     => '23.72305',
+                'longitude'    => '90.40860',
+                'time_zone'    => ['name' => 'Asia/Dhaka'],
+                'isp'          => 'Ranks ITT',
                 'organization' => 'AS24323 Ranks ITT',
-                'currency' => ['code' => 'BDT'],
+                'currency'     => ['code' => 'BDT'],
                 'calling_code' => '+880',
-                'is_eu' => false,
+                'is_eu'        => false,
             ], 200),
         ]);
 
         Cache::flush();
-
-        config(['device-detector.enable_ip_geolocation' => true]);
-        config(['device-detector.ip_geolocation_api_key' => 'test-api-key']);
+        config(['laratrack.enable_ip_geolocation' => true]);
+        config(['laratrack.ip_geolocation_api_key' => 'test-api-key']);
 
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 Chrome/120.0.0.0');
         $request->headers->set('X-Real-IP', '91.128.103.196');
 
-        // First call — hits the API
-        $result1 = DeviceDetector::detect($request);
-
-        // Second call — should read from cache, not call API again
-        $result2 = DeviceDetector::getLocation($request);
+        $result1 = LaraTrack::detect($request);
+        LaraTrack::getLocation($request);
 
         $this->assertEquals('Bangladesh', $result1['location']['country']);
         $this->assertEquals('Dhaka', $result1['location']['city']);
@@ -483,20 +478,17 @@ class DeviceDetectorTest extends TestCase
     #[Test]
     public function it_returns_empty_location_on_api_failure(): void
     {
-        Http::fake([
-            'api.ipgeolocation.io/*' => Http::response([], 500),
-        ]);
+        Http::fake(['api.ipgeolocation.io/*' => Http::response([], 500)]);
 
         Cache::flush();
-
-        config(['device-detector.enable_ip_geolocation' => true]);
-        config(['device-detector.ip_geolocation_api_key' => 'test-api-key']);
+        config(['laratrack.enable_ip_geolocation' => true]);
+        config(['laratrack.ip_geolocation_api_key' => 'test-api-key']);
 
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 Chrome/120.0.0.0');
         $request->headers->set('X-Real-IP', '1.2.3.4');
 
-        $result = DeviceDetector::detect($request);
+        $result = LaraTrack::detect($request);
 
         $this->assertIsArray($result['location']);
         $this->assertEmpty($result['location']);
@@ -508,32 +500,31 @@ class DeviceDetectorTest extends TestCase
         Http::fake([
             'api.ipgeolocation.io/*' => Http::response([
                 'country_name' => 'Germany',
-                'country_code2' => 'DE',
-                'city' => 'Berlin',
-                'state_prov' => 'Berlin',
-                'district' => '',
-                'zipcode' => '10115',
-                'latitude' => '52.5200',
-                'longitude' => '13.4050',
-                'time_zone' => ['name' => 'Europe/Berlin'],
-                'isp' => 'Deutsche Telekom',
+                'country_code2'=> 'DE',
+                'city'         => 'Berlin',
+                'state_prov'   => 'Berlin',
+                'district'     => '',
+                'zipcode'      => '10115',
+                'latitude'     => '52.5200',
+                'longitude'    => '13.4050',
+                'time_zone'    => ['name' => 'Europe/Berlin'],
+                'isp'          => 'Deutsche Telekom',
                 'organization' => 'Deutsche Telekom AG',
-                'currency' => ['code' => 'EUR'],
+                'currency'     => ['code' => 'EUR'],
                 'calling_code' => '+49',
-                'is_eu' => true,
+                'is_eu'        => true,
             ], 200),
         ]);
 
         Cache::flush();
-
-        config(['device-detector.enable_ip_geolocation' => true]);
-        config(['device-detector.ip_geolocation_api_key' => 'test-api-key']);
+        config(['laratrack.enable_ip_geolocation' => true]);
+        config(['laratrack.ip_geolocation_api_key' => 'test-api-key']);
 
         $request = Request::create('/', 'GET');
         $request->headers->set('User-Agent', 'Mozilla/5.0 Chrome/120.0.0.0');
         $request->headers->set('X-Real-IP', '80.0.0.1');
 
-        $location = DeviceDetector::getLocation($request);
+        $location = LaraTrack::getLocation($request);
 
         $this->assertEquals('Germany', $location['country']);
         $this->assertEquals('Berlin', $location['city']);
