@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/packagist/l/sajidwarner/laravel-device-detector.svg?style=flat-square)](LICENSE.md)
 [![Tests](https://img.shields.io/badge/tests-36%20passing-brightgreen?style=flat-square)](#testing)
 
-A powerful Laravel package for **browser detection**, **device detection**, **IP geolocation**, **VPN/Proxy detection**, **bot/robot detection**, **Tor detection**, **language detection**, and **platform detection** — with built-in middleware, Laravel events, and Artisan commands. Supports Laravel 10, 11, and 12 with PHP 8.1+.
+A powerful Laravel package for **browser detection**, **device detection**, **IP geolocation**, **VPN/Proxy detection**, **bot/robot detection**, **Tor detection**, **language detection**, and **platform detection** — with built-in middleware, Laravel events, and Artisan commands. Supports Laravel 10, 11, 12, and 13 with PHP 8.1+.
 
 ## Features
 
@@ -492,6 +492,7 @@ return [
 | 10.x | ✅ |
 | 11.x | ✅ |
 | 12.x | ✅ |
+| 13.x | ✅ |
 
 ## Testing
 
