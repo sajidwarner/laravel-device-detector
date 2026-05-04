@@ -1,30 +1,34 @@
 # Laravel Device Detector
 
-A comprehensive Laravel package for detecting browsers, devices, robots, platforms, and Tor connections with advanced user agent parsing.
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/sajidwarner/laravel-device-detector.svg?style=flat-square)](https://packagist.org/packages/sajidwarner/laravel-device-detector)
+[![Total Downloads](https://img.shields.io/packagist/dt/sajidwarner/laravel-device-detector.svg?style=flat-square)](https://packagist.org/packages/sajidwarner/laravel-device-detector)
+[![PHP Version](https://img.shields.io/packagist/php-v/sajidwarner/laravel-device-detector.svg?style=flat-square)](https://packagist.org/packages/sajidwarner/laravel-device-detector)
+[![License](https://img.shields.io/packagist/l/sajidwarner/laravel-device-detector.svg?style=flat-square)](LICENSE.md)
+[![Tests](https://img.shields.io/badge/tests-33%20passing-brightgreen?style=flat-square)](#testing)
+
+A powerful Laravel package for **browser detection**, **device detection**, **IP geolocation**, **bot/robot detection**, **Tor detection**, and **platform detection** using user agent parsing and modern Client Hints (`Sec-CH-UA`). Supports Laravel 10, 11, and 12 with PHP 8.1+.
 
 ## Features
 
-- 🌐 **Browser Detection**: Chrome, Firefox, Safari, Edge, Opera, Brave, Tor, and more
-- 📱 **Mobile Device Detection**: Detect mobile brands and models (Samsung, iPhone, Xiaomi, etc.)
-- 💻 **Desktop Detection**: Identify desktop browsers and operating systems
-- 🤖 **Robot/Bot Detection**: Identify search engine crawlers and bots
-- 🔒 **Tor Detection**: Real-time Tor exit node detection with caching
-- 🖥️ **Platform Detection**: Windows, macOS, Linux, Android, iOS, etc.
-- 📊 **Tablet Detection**: Identify tablets and their models
-- ⚡ **Performance**: Cached Tor nodes, optimized regex patterns
-- 🎯 **Client Hints Support**: Uses modern Sec-CH-UA headers
+- 🌐 **Browser Detection** — Chrome, Firefox, Safari, Edge, Opera, Brave, Vivaldi, Tor Browser, Kahf, DuckDuckGo, Samsung Internet, UC Browser, and more
+- 📱 **Mobile Device Detection** — Detect brand and model (Apple, Samsung, Xiaomi, Huawei, OnePlus, Oppo, Vivo, Google Pixel, Motorola, Nokia, LG, Sony, HTC)
+- 💻 **Desktop Detection** — Identify desktop browsers and operating systems
+- 📊 **Tablet Detection** — iPad, Android tablets, Kindle, and more
+- 🤖 **Robot / Bot Detection** — 26+ bots: Googlebot, Bingbot, Facebook, Twitter, LinkedIn, WhatsApp, Telegram, Semrush, Ahrefs, and more
+- 🔒 **Tor Detection** — Real-time Tor exit node detection with caching
+- 🗺️ **IP Geolocation** — Country, city, timezone, ISP, currency via [ipgeolocation.io](https://ipgeolocation.io) (free plan available)
+- 🖥️ **Platform / OS Detection** — Windows 10, macOS, Linux, Android, iOS, Chrome OS, BlackBerry, and more
+- ⚡ **Performance** — Per-IP caching for geolocation and Tor nodes
+- 🎯 **Client Hints Support** — Uses modern `Sec-CH-UA` headers as primary detection method
+- 🔧 **Blade Directives** — `@mobile`, `@tablet`, `@desktop`, `@robot`, `@tor`
 
 ## Installation
-
-Install via Composer:
 
 ```bash
 composer require sajidwarner/laravel-device-detector
 ```
 
-### Laravel Auto-Discovery
-
-The package will automatically register the service provider and facade.
+Laravel's auto-discovery will automatically register the service provider and facade.
 
 ### Manual Registration (Optional)
 
@@ -53,18 +57,15 @@ php artisan vendor:publish --provider="SajidWarner\DeviceDetector\DeviceDetector
 ```php
 use SajidWarner\DeviceDetector\Facades\DeviceDetector;
 
-// Detect current request
-$device = DeviceDetector::detect();
-
-// Get specific information
-$browser = DeviceDetector::getBrowser();
-$platform = DeviceDetector::getPlatform();
-$deviceType = DeviceDetector::getDeviceType();
-$isMobile = DeviceDetector::isMobile();
-$isTablet = DeviceDetector::isTablet();
-$isDesktop = DeviceDetector::isDesktop();
-$isRobot = DeviceDetector::isRobot();
-$isTor = DeviceDetector::isTor();
+$browser  = DeviceDetector::getBrowser();       // "Google Chrome"
+$platform = DeviceDetector::getPlatform();      // "Windows 10"
+$type     = DeviceDetector::getDeviceType();    // "desktop" | "mobile" | "tablet"
+$isMobile = DeviceDetector::isMobile();         // true / false
+$isTablet = DeviceDetector::isTablet();         // true / false
+$isDesktop= DeviceDetector::isDesktop();        // true / false
+$isRobot  = DeviceDetector::isRobot();          // true / false
+$isTor    = DeviceDetector::isTor();            // true / false
+$location = DeviceDetector::getLocation();      // array (when geolocation enabled)
 ```
 
 ### Full Detection Array
@@ -73,36 +74,35 @@ $isTor = DeviceDetector::isTor();
 $data = DeviceDetector::detect();
 
 /*
-Returns:
 [
-    'browser'        => 'Google Chrome',
-    'browser_version'=> '120.0',
-    'platform'       => 'Windows 10',
-    'device_type'    => 'desktop',
-    'device_brand'   => null,
-    'device_model'   => null,
-    'is_mobile'      => false,
-    'is_tablet'      => false,
-    'is_desktop'     => true,
-    'is_robot'       => false,
-    'is_tor'         => false,
-    'robot_name'     => null,
-    'ip'             => '192.168.1.1',
-    'location'       => [               // only when geolocation is enabled
-        'country'      => 'Bangladesh',
-        'country_code' => 'BD',
-        'city'         => 'Dhaka',
-        'state'        => 'Dhaka Division',
-        'district'     => 'Dhaka',
-        'zip'          => '1000',
-        'latitude'     => '23.72305',
-        'longitude'    => '90.40860',
-        'timezone'     => 'Asia/Dhaka',
-        'isp'          => 'Ranks ITT',
-        'organization' => 'AS24323 Ranks ITT',
-        'currency'     => 'BDT',
-        'calling_code' => '+880',
-        'is_eu'        => false,
+    'browser'         => 'Google Chrome',
+    'browser_version' => '120.0',
+    'platform'        => 'Windows 10',
+    'device_type'     => 'desktop',
+    'device_brand'    => null,
+    'device_model'    => null,
+    'is_mobile'       => false,
+    'is_tablet'       => false,
+    'is_desktop'      => true,
+    'is_robot'        => false,
+    'is_tor'          => false,
+    'robot_name'      => null,
+    'ip'              => '192.168.1.1',
+    'location'        => [                  // only when geolocation is enabled
+        'country'       => 'Bangladesh',
+        'country_code'  => 'BD',
+        'city'          => 'Dhaka',
+        'state'         => 'Dhaka Division',
+        'district'      => 'Dhaka',
+        'zip'           => '1000',
+        'latitude'      => '23.72305',
+        'longitude'     => '90.40860',
+        'timezone'      => 'Asia/Dhaka',
+        'isp'           => 'Ranks ITT',
+        'organization'  => 'AS24323 Ranks ITT',
+        'currency'      => 'BDT',
+        'calling_code'  => '+880',
+        'is_eu'         => false,
     ],
 ]
 */
@@ -119,25 +119,23 @@ class HomeController extends Controller
     public function index(Request $request)
     {
         $device = DeviceDetector::detect($request);
-        
+
         if ($device['is_mobile']) {
             return view('mobile.home', compact('device'));
         }
-        
+
         if ($device['is_robot']) {
             return response('Bot detected: ' . $device['robot_name']);
         }
-        
+
         return view('home', compact('device'));
     }
 }
 ```
 
-### Middleware Usage
+### Middleware — Block Tor or Bots
 
-Create a middleware to block Tor or bots:
-
-```php
+```bash
 php artisan make:middleware BlockTor
 ```
 
@@ -149,7 +147,7 @@ public function handle($request, Closure $next)
     if (DeviceDetector::isTor($request)) {
         return response('Tor connections not allowed', 403);
     }
-    
+
     return $next($request);
 }
 ```
@@ -158,19 +156,19 @@ public function handle($request, Closure $next)
 
 ```blade
 @mobile
-    <p>Mobile view content</p>
+    <p>This is shown only on mobile devices</p>
 @endmobile
 
-@desktop
-    <p>Desktop view content</p>
-@enddesktop
-
 @tablet
-    <p>Tablet view content</p>
+    <p>This is shown only on tablets</p>
 @endtablet
 
+@desktop
+    <p>This is shown only on desktop</p>
+@enddesktop
+
 @robot
-    <p>Bot detected</p>
+    <p>Bot/crawler detected</p>
 @endrobot
 
 @tor
@@ -178,120 +176,45 @@ public function handle($request, Closure $next)
 @endtor
 ```
 
-## Detected Browsers
+## IP Geolocation
 
-- Google Chrome
-- Mozilla Firefox
-- Safari
-- Microsoft Edge
-- Opera / Opera GX
-- Brave
-- Vivaldi
-- Tor Browser
-- Kahf Browser
-- Samsung Internet
-- UC Browser
-- Internet Explorer
-- And many more...
+Get real-time location data for any visitor IP using [ipgeolocation.io](https://ipgeolocation.io).
 
-## Detected Mobile Brands
+**Free plan:** 30,000 requests/month — no credit card required.
 
-- Apple (iPhone, iPad)
-- Samsung
-- Xiaomi
-- Huawei
-- OnePlus
-- Oppo
-- Vivo
-- Google (Pixel)
-- Motorola
-- Nokia
-- LG
-- Sony
-- And more...
+### Setup
 
-## Detected Robots/Bots
-
-- Googlebot
-- Bingbot
-- Yahoo Slurp
-- DuckDuckBot
-- Baiduspider
-- YandexBot
-- Facebook Bot
-- Twitter Bot
-- LinkedIn Bot
-- And many more...
-
-## Configuration
-
-Edit `config/device-detector.php` or set via `.env`:
-
-```php
-return [
-    // Enable/disable Tor detection
-    'enable_tor_detection' => env('DEVICE_DETECTOR_TOR_DETECTION', true),
-
-    // Cache duration for Tor exit nodes (seconds)
-    'tor_cache_duration' => env('DEVICE_DETECTOR_TOR_CACHE', 3600),
-
-    // Tor exit nodes source URL
-    'tor_exit_node_url' => env('DEVICE_DETECTOR_TOR_URL', 'https://check.torproject.org/exit-addresses'),
-
-    // Enable/disable robot detection
-    'enable_robot_detection' => env('DEVICE_DETECTOR_ROBOT_DETECTION', true),
-
-    // IP Geolocation via ipgeolocation.io (free plan: 30,000 req/month)
-    'enable_ip_geolocation' => env('DEVICE_DETECTOR_GEO_ENABLED', false),
-    'ip_geolocation_api_key' => env('DEVICE_DETECTOR_GEO_API_KEY', ''),
-    'ip_geolocation_api_url' => env('DEVICE_DETECTOR_GEO_URL', 'https://api.ipgeolocation.io/v3/ipgeo'),
-    'ip_geolocation_cache_duration' => env('DEVICE_DETECTOR_GEO_CACHE', 3600),
-];
-```
-
-### Enabling IP Geolocation
-
-1. Sign up at [ipgeolocation.io](https://ipgeolocation.io) and copy your **free API key** (30,000 requests/month — no credit card required)
-2. Add to your application `.env` file (**never commit your API key to git**):
+1. Sign up at [ipgeolocation.io](https://ipgeolocation.io) and get your free API key
+2. Add to your `.env` file (**never commit your API key to git**):
 
 ```env
 DEVICE_DETECTOR_GEO_ENABLED=true
 DEVICE_DETECTOR_GEO_API_KEY=your_own_api_key_here
 ```
 
-> **Note:** Your `.env` file is already excluded from git by Laravel's default `.gitignore`. Never hardcode your API key in PHP files.
-
-3. Use in your code:
+3. Use in your application:
 
 ```php
-// Full detect — includes location
-$data = DeviceDetector::detect();
-$location = $data['location'];
-
-echo $location['country'];      // e.g. Bangladesh
-echo $location['country_code']; // e.g. BD
-echo $location['city'];         // e.g. Dhaka
-echo $location['state'];        // e.g. Dhaka Division
-echo $location['timezone'];     // e.g. Asia/Dhaka
-echo $location['isp'];          // e.g. Ranks ITT
-echo $location['currency'];     // e.g. BDT
-echo $location['calling_code']; // e.g. +880
-$location['is_eu'];             // true/false
-
-// Or use the dedicated helper:
 $location = DeviceDetector::getLocation();
+
+echo $location['country'];      // Bangladesh
+echo $location['city'];         // Dhaka
+echo $location['timezone'];     // Asia/Dhaka
+echo $location['isp'];          // Ranks ITT
+echo $location['currency'];     // BDT
+echo $location['calling_code']; // +880
 ```
 
-#### Geolocation Response Fields
+### Geolocation Response Fields
 
 | Field | Description | Example |
 |-------|-------------|---------|
 | `country` | Full country name | `Bangladesh` |
 | `country_code` | ISO 2-letter code | `BD` |
 | `city` | City name | `Dhaka` |
-| `state` | State/province | `Dhaka Division` |
+| `state` | State / Province | `Dhaka Division` |
 | `district` | District | `Dhaka` |
-| `zip` | Postal/ZIP code | `1000` |
+| `zip` | Postal / ZIP code | `1000` |
 | `latitude` | Latitude | `23.72305` |
 | `longitude` | Longitude | `90.40860` |
 | `timezone` | Timezone name | `Asia/Dhaka` |
@@ -301,33 +224,83 @@ $location = DeviceDetector::getLocation();
 | `calling_code` | Phone country code | `+880` |
 | `is_eu` | EU member country | `false` |
 
-## API Routes
+## Detected Browsers
 
-The package provides test routes (disabled in production):
+| Browser | Detection Method |
+|---------|-----------------|
+| Google Chrome | User-Agent + Sec-CH-UA |
+| Mozilla Firefox | User-Agent |
+| Safari | User-Agent |
+| Microsoft Edge | User-Agent + Sec-CH-UA |
+| Opera / Opera GX | User-Agent |
+| Brave | User-Agent + Sec-CH-UA |
+| Vivaldi | User-Agent |
+| Tor Browser | User-Agent |
+| Kahf Browser | X-Requested-With header |
+| DuckDuckGo Browser | X-Requested-With + User-Agent |
+| Samsung Internet | User-Agent |
+| UC Browser | User-Agent |
+| Internet Explorer | User-Agent |
+| Chromium | User-Agent |
 
+## Detected Mobile Brands & Models
+
+| Brand | Models Detected |
+|-------|----------------|
+| Apple | iPhone, iPad (with model number) |
+| Samsung | Galaxy series, SM- model codes |
+| Xiaomi | Redmi, Mi, Poco series |
+| Huawei | Huawei, Honor series |
+| OnePlus | All OnePlus models |
+| Oppo | All Oppo models |
+| Vivo | All Vivo models |
+| Google | Pixel series |
+| Motorola | Moto series |
+| Nokia | All Nokia models |
+| LG | All LG models |
+| Sony | All Sony models |
+| HTC | All HTC models |
+
+## Detected Robots & Bots
+
+Googlebot, Bingbot, Yahoo Slurp, DuckDuckBot, Baiduspider, YandexBot, Sogou, Exabot, facebot, ia_archiver, Facebookbot, Twitterbot, LinkedInBot, WhatsApp, Telegram, Discordbot, Slackbot, Applebot, AhrefsBot, SemrushBot, MJ12bot, DotBot, Screaming Frog, SEOkicks, and more.
+
+## Detected Platforms / Operating Systems
+
+Windows 10, Windows 8.1, Windows 8, Windows 7, Windows Vista, Windows XP, macOS, iOS (iPhone), iOS (iPad), iPadOS, Android, Ubuntu, Linux, Chrome OS, BlackBerry, Windows Phone.
+
+## Configuration
+
+Edit `config/device-detector.php` or use `.env` variables:
+
+```php
+return [
+    'enable_tor_detection'         => env('DEVICE_DETECTOR_TOR_DETECTION', true),
+    'tor_cache_duration'           => env('DEVICE_DETECTOR_TOR_CACHE', 3600),
+    'tor_exit_node_url'            => env('DEVICE_DETECTOR_TOR_URL', 'https://check.torproject.org/exit-addresses'),
+    'enable_robot_detection'       => env('DEVICE_DETECTOR_ROBOT_DETECTION', true),
+    'enable_ip_geolocation'        => env('DEVICE_DETECTOR_GEO_ENABLED', false),
+    'ip_geolocation_api_key'       => env('DEVICE_DETECTOR_GEO_API_KEY', ''),
+    'ip_geolocation_api_url'       => env('DEVICE_DETECTOR_GEO_URL', 'https://api.ipgeolocation.io/v3/ipgeo'),
+    'ip_geolocation_cache_duration'=> env('DEVICE_DETECTOR_GEO_CACHE', 3600),
+];
 ```
-GET /device-detector/test
-```
-
-Returns JSON with detected device information.
 
 ## Requirements
 
 | PHP Version | Supported |
 |-------------|-----------|
-| 8.1         | ✅ Yes    |
-| 8.2         | ✅ Yes    |
-| 8.3         | ✅ Yes    |
-| 8.4         | ✅ Yes    |
-| 8.5+        | ✅ Yes (future-compatible via `^8.1`) |
+| 8.1 | ✅ |
+| 8.2 | ✅ |
+| 8.3 | ✅ |
+| 8.4 | ✅ |
+| 8.5+ | ✅ (future-compatible via `^8.1`) |
 
 | Laravel Version | Supported |
 |-----------------|-----------|
-| 10.x            | ✅ Yes    |
-| 11.x            | ✅ Yes    |
-| 12.x            | ✅ Yes    |
-
-The package uses `"php": "^8.1"` in composer.json, which means PHP 8.1 and all future 8.x releases (8.2, 8.3, 8.4, 8.5, etc.) are automatically supported without needing to update the package.
+| 10.x | ✅ |
+| 11.x | ✅ |
+| 12.x | ✅ |
 
 ## Testing
 
@@ -335,17 +308,26 @@ The package uses `"php": "^8.1"` in composer.json, which means PHP 8.1 and all f
 composer test
 ```
 
+33 tests · 80 assertions · all passing ✅
+
+## API Routes (Non-Production Only)
+
+```
+GET /device-detector/test
+```
+
+Returns JSON with full detection data including headers. Disabled automatically in production.
+
 ## Security
 
-If you discover any security issues, please email bestcyberking@gmail.com
- instead of using the issue tracker.
+If you discover any security issues, please email [bestcyberking@gmail.com](mailto:bestcyberking@gmail.com) instead of using the issue tracker.
 
 ## Credits
 
-- [Syed Sajid Akram](https://github.com/sajidwarner) - Package Author & Maintainer
-- [Claude.ai](https://claude.ai) - AI Assistant by Anthropic (Package Development & Architecture)
-- [ChatGPT](https://chat.openai.com/) - AI Assistant by OpenAI (Code Assistance & Suggestions)
-- [Google Gemini](https://gemini.google/) - AI Assistant by Google (Code Assistance & Suggestions)
+- [Syed Sajid Akram](https://github.com/sajidwarner) — Package Author & Maintainer
+- [Claude.ai](https://claude.ai) — AI Assistant by Anthropic
+- [ChatGPT](https://chat.openai.com/) — AI Assistant by OpenAI
+- [Google Gemini](https://gemini.google/) — AI Assistant by Google
 
 ## License
 
@@ -354,3 +336,7 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 ## Support
 
 For support, please open an issue on [GitHub](https://github.com/sajidwarner/laravel-device-detector).
+
+---
+
+**Keywords:** laravel device detector, laravel browser detection, laravel user agent parser, laravel mobile detection, laravel ip geolocation, laravel bot detection, laravel tor detection, php device detection, laravel package, user agent detection laravel
