@@ -182,6 +182,8 @@ Get real-time location data for any visitor IP using [ipgeolocation.io](https://
 
 **Free plan:** 30,000 requests/month — no credit card required.
 
+> 🔗 **Sign up here (free):** [https://app.ipgeolocation.io/signup?referral=AFF-YWEVCOJFNY](https://app.ipgeolocation.io/signup?referral=AFF-YWEVCOJFNY)
+
 ### Setup
 
 1. Sign up at [ipgeolocation.io](https://app.ipgeolocation.io/signup?referral=AFF-YWEVCOJFNY) and get your free API key
