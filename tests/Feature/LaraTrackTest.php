@@ -356,9 +356,86 @@ class LaraTrackTest extends TestCase
         $this->assertFalse(LaraTrack::isMobile($request));
         $this->assertTrue(LaraTrack::isDesktop($request));
         $this->assertFalse(LaraTrack::isRobot($request));
+        $this->assertFalse(LaraTrack::isVpn($request));
+        $this->assertFalse(LaraTrack::isProxy($request));
         $this->assertEquals('Google Chrome', LaraTrack::getBrowser($request));
         $this->assertEquals('desktop', LaraTrack::getDeviceType($request));
         $this->assertEquals('Windows 10', LaraTrack::getPlatform($request));
+    }
+
+    // -------------------------------------------------------------------------
+    // Language Detection
+    // -------------------------------------------------------------------------
+
+    #[Test]
+    public function it_can_detect_language(): void
+    {
+        $request = Request::create('/', 'GET');
+        $request->headers->set('User-Agent', 'Mozilla/5.0 Chrome/120.0.0.0');
+        $request->headers->set('Accept-Language', 'en-US,en;q=0.9,bn;q=0.8');
+
+        $result = LaraTrack::detect($request);
+
+        $this->assertEquals('en-US', $result['language']);
+    }
+
+    #[Test]
+    public function it_detects_language_from_accept_language_header(): void
+    {
+        $request = Request::create('/', 'GET');
+        $request->headers->set('User-Agent', 'Mozilla/5.0 Chrome/120.0.0.0');
+        $request->headers->set('Accept-Language', 'bn-BD,bn;q=0.9');
+
+        $result = LaraTrack::detect($request);
+
+        $this->assertEquals('bn-BD', $result['language']);
+    }
+
+    // -------------------------------------------------------------------------
+    // VPN / Proxy Detection
+    // -------------------------------------------------------------------------
+
+    #[Test]
+    public function it_detects_vpn_from_geolocation_response(): void
+    {
+        Http::fake([
+            'api.ipgeolocation.io/*' => Http::response([
+                'country_name'  => 'United States',
+                'country_code2' => 'US',
+                'city'          => 'New York',
+                'state_prov'    => 'New York',
+                'district'      => '',
+                'zipcode'       => '10001',
+                'latitude'      => '40.7128',
+                'longitude'     => '-74.0060',
+                'time_zone'     => ['name' => 'America/New_York'],
+                'isp'           => 'NordVPN',
+                'organization'  => 'NordVPN',
+                'currency'      => ['code' => 'USD'],
+                'calling_code'  => '+1',
+                'is_eu'         => false,
+                'security'      => [
+                    'is_vpn'        => true,
+                    'is_proxy'      => false,
+                    'is_datacenter' => false,
+                    'threat_score'  => 80,
+                ],
+            ], 200),
+        ]);
+
+        Cache::flush();
+        config(['laratrack.enable_ip_geolocation' => true]);
+        config(['laratrack.ip_geolocation_api_key' => 'test-key']);
+        config(['laratrack.fire_events' => false]);
+
+        $request = Request::create('/', 'GET');
+        $request->headers->set('User-Agent', 'Mozilla/5.0 Chrome/120.0.0.0');
+        $request->headers->set('X-Real-IP', '5.5.5.5');
+
+        $result = LaraTrack::detect($request);
+
+        $this->assertTrue($result['is_vpn']);
+        $this->assertFalse($result['is_proxy']);
     }
 
     // -------------------------------------------------------------------------

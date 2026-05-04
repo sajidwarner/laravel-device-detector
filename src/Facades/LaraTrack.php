@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool   isDesktop(\Illuminate\Http\Request $request = null)
  * @method static bool   isRobot(\Illuminate\Http\Request $request = null)
  * @method static bool   isTor(\Illuminate\Http\Request $request = null)
+ * @method static bool   isVpn(\Illuminate\Http\Request $request = null)
+ * @method static bool   isProxy(\Illuminate\Http\Request $request = null)
+ * @method static string getLanguage(\Illuminate\Http\Request $request = null)
  * @method static array  getLocation(\Illuminate\Http\Request $request = null)
  *
  * @see \SajidWarner\LaraTrack\LaraTrack

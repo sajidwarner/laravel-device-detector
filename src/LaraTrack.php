@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use SajidWarner\LaraTrack\Events\BotDetected;
+use SajidWarner\LaraTrack\Events\TorDetected;
+use SajidWarner\LaraTrack\Events\VpnDetected;
 
 class LaraTrack
 {
@@ -32,12 +35,33 @@ class LaraTrack
         $userAgent = $this->getUserAgent();
         $ip        = $this->getIp();
 
-        $isTor      = $this->detectTor($ip);
-        $robotData  = $this->detectRobot($userAgent);
-        $browserData= $this->detectBrowser($userAgent);
-        $platform   = $this->detectPlatform($userAgent);
-        $deviceData = $this->detectDevice($userAgent);
-        $location   = $this->getIpGeolocation($ip);
+        $isTor       = $this->detectTor($ip);
+        $robotData   = $this->detectRobot($userAgent);
+        $browserData = $this->detectBrowser($userAgent);
+        $platform    = $this->detectPlatform($userAgent);
+        $deviceData  = $this->detectDevice($userAgent);
+        $geoData     = $this->getIpGeolocation($ip);
+        $language    = $this->detectLanguage();
+
+        $isVpn   = $geoData['is_vpn'] ?? false;
+        $isProxy = $geoData['is_proxy'] ?? false;
+
+        // Fire events
+        if (config('laratrack.fire_events', true)) {
+            if ($robotData['is_robot']) {
+                BotDetected::dispatch($this->request, $robotData['name'] ?? 'Unknown', $ip);
+            }
+            if ($isTor) {
+                TorDetected::dispatch($this->request, $ip);
+            }
+            if ($isVpn) {
+                VpnDetected::dispatch($this->request, $ip, 'vpn');
+            } elseif ($isProxy) {
+                VpnDetected::dispatch($this->request, $ip, 'proxy');
+            }
+        }
+
+        $location = collect($geoData)->except(['is_vpn', 'is_proxy', 'is_datacenter', 'threat_score'])->toArray();
 
         $this->detectionData = [
             'browser'         => $browserData['name'],
@@ -51,7 +75,10 @@ class LaraTrack
             'is_desktop'      => $deviceData['is_desktop'],
             'is_robot'        => $robotData['is_robot'],
             'is_tor'          => $isTor,
+            'is_vpn'          => $isVpn,
+            'is_proxy'        => $isProxy,
             'robot_name'      => $robotData['name'],
+            'language'        => $language,
             'ip'              => $ip,
             'location'        => $location,
         ];
@@ -81,7 +108,8 @@ class LaraTrack
                 );
 
                 if ($response->successful()) {
-                    $geo = $response->json();
+                    $geo      = $response->json();
+                    $security = $geo['security'] ?? [];
                     return [
                         'country'      => $geo['country_name'] ?? null,
                         'country_code' => $geo['country_code2'] ?? null,
@@ -97,6 +125,10 @@ class LaraTrack
                         'currency'     => $geo['currency']['code'] ?? null,
                         'calling_code' => $geo['calling_code'] ?? null,
                         'is_eu'        => $geo['is_eu'] ?? false,
+                        'is_vpn'       => $security['is_vpn'] ?? false,
+                        'is_proxy'     => $security['is_proxy'] ?? false,
+                        'is_datacenter'=> $security['is_datacenter'] ?? false,
+                        'threat_score' => $security['threat_score'] ?? 0,
                     ];
                 }
             } catch (\Exception $e) {
@@ -392,6 +424,19 @@ class LaraTrack
         return null;
     }
 
+    protected function detectLanguage(): string
+    {
+        $header = $this->request->header('Accept-Language', '');
+        if (empty($header)) {
+            return 'Unknown';
+        }
+
+        // Parse "en-US,en;q=0.9,bn;q=0.8" → "en-US"
+        $parts = explode(',', $header);
+        $primary = trim(explode(';', $parts[0])[0]);
+        return $primary ?: 'Unknown';
+    }
+
     protected function getUserAgent(): string
     {
         return strtolower($this->request->header('User-Agent', ''));
@@ -410,5 +455,8 @@ class LaraTrack
     public function isDesktop(?Request $request = null): bool       { return $this->detect($request)['is_desktop']; }
     public function isRobot(?Request $request = null): bool         { return $this->detect($request)['is_robot']; }
     public function isTor(?Request $request = null): bool           { return $this->detect($request)['is_tor']; }
+    public function isVpn(?Request $request = null): bool           { return $this->detect($request)['is_vpn']; }
+    public function isProxy(?Request $request = null): bool         { return $this->detect($request)['is_proxy']; }
+    public function getLanguage(?Request $request = null): string   { return $this->detect($request)['language']; }
     public function getLocation(?Request $request = null): array    { return $this->detect($request)['location'] ?? []; }
 }
